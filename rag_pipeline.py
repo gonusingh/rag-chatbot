@@ -621,9 +621,9 @@ ANSWER:"""
 
     try:
         response = client.chat.completions.create(
-        model="qwen/qwen3.6-27b",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.1
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.1
         )
         answer = response.choices[0].message.content
         answer = re.sub(
