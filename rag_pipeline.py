@@ -20,6 +20,7 @@ import faiss
 import fitz
 from sentence_transformers import SentenceTransformer
 from dotenv import load_dotenv
+import re
 
 load_dotenv()
 
@@ -51,7 +52,7 @@ logging.basicConfig(
         # 'a' mode (default) = append, never overwrites
         # Every run adds to the log file
     ]
-)
+) 
 
 # Create module-level logger
 # Best practice: one logger per file, named after the module
@@ -92,11 +93,12 @@ def load_pdf(file_path):
         all_text.append(page_text)
         logger.debug(f"Page {page_num + 1}: {len(page_text)} chars")
 
+    page_count = len(pdf_document)
     pdf_document.close()
     full_text = "\n".join(all_text)
 
     logger.info(f"PDF loaded: {len(full_text)} characters, "
-                f"{len(pdf_document.pages) if hasattr(pdf_document, 'pages') else 'N'} pages")
+                f"{page_count} pages")
     return full_text
 
 
@@ -619,11 +621,16 @@ ANSWER:"""
 
     try:
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.1
+        model="qwen/qwen3.6-27b",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.1
         )
         answer = response.choices[0].message.content
+        answer = re.sub(
+            r'<think>.*?</think>', '',
+            answer,
+            flags=re.DOTALL
+        ).strip()
         logger.info(
             f"Groq response received: {len(answer)} characters"
         )
